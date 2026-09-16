@@ -1,0 +1,22 @@
+# Archivos de entorno virtual
+venv/
+.venv/
+
+# Cache de Python
+__pycache__/
+
+# Modelos y pesos de IA / ML
+*.h5
+*.pt
+*.onnx
+*.bin
+*.safetensors
+ml-models/weights/
+
+# Variables de entorno y credenciales
+.env
+
+# Archivos comprimidos y de instalación
+*.zip
+*.daf
+installer.php
