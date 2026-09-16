@@ -51,7 +51,7 @@ compatibility/
    Ver `models/metricas.json` para el detalle completo (matriz de confusión y
    reporte de clasificación).
 
-## Cómo usarlo
+## Cómo usarlo (scripts locales)
 
 ```bash
 pip install -r requirements.txt
@@ -60,15 +60,50 @@ python src/train_model.py        # (ya entrenado, solo si se quiere reentrenar)
 python src/predict.py            # corre 2 ejemplos de demostración
 ```
 
-Para integrarlo con el chatbot / plugin de WordPress, se expondrá `predict.py`
-como un endpoint de una API (por ejemplo, con FastAPI), que el plugin de PHP
-consultará vía HTTP antes de mostrarle la cotización final al cliente.
+## API (para conectar con el chatbot / plugin de WordPress)
+
+El modelo ya está expuesto como una API REST con Flask en `api/app.py`.
+
+```bash
+cd api
+python app.py
+# queda escuchando en http://localhost:5001
+```
+
+**Endpoints:**
+- `GET /health` — verifica que el servicio esté vivo.
+- `POST /validar-compatibilidad` — recibe un JSON con los 10 campos del
+  componente (ver `predict.py`) y devuelve `compatible`, `probabilidad_compatible`
+  y `explicaciones` (lista de razones técnicas si no es compatible).
+
+Ejemplo de consumo desde el plugin de WordPress (PHP, con `wp_remote_post`):
+
+```php
+$response = wp_remote_post('http://localhost:5001/validar-compatibilidad', [
+    'headers' => ['Content-Type' => 'application/json'],
+    'body'    => json_encode([
+        'cpu_socket' => 'AM4', 'mb_socket' => 'AM4',
+        'ram_type' => 'DDR4', 'mb_ram_type' => 'DDR4',
+        'cpu_tdp_w' => 105, 'gpu_tdp_w' => 220,
+        'psu_wattage' => 650, 'gpu_length_mm' => 310,
+        'case_form_factor' => 'ATX', 'mb_form_factor' => 'ATX',
+    ]),
+]);
+$resultado = json_decode(wp_remote_retrieve_body($response), true);
+```
+
+Ya fue probada en vivo con 4 casos: salud del servicio, combinación compatible,
+combinación no compatible (con explicaciones) y validación de campos faltantes.
 
 ## Pendiente
 
 - [ ] Reemplazar/ampliar el dataset sintético con casos reales de la empresa en
       cuanto estén disponibles.
-- [ ] Exponer `predict.py` como API (FastAPI) para conexión con el plugin de WordPress.
+- [ ] Conectar el endpoint con el plugin de WordPress (`jyp-cotizador-ia`) y con
+      el chatbot.
 - [ ] Ampliar el conjunto de reglas si se detectan más restricciones técnicas
       relevantes al catálogo real de J&P Periféricos (ej. compatibilidad de
       refrigeración, conectores PCIe específicos).
+- [ ] Antes de producción: reemplazar el servidor de desarrollo de Flask por uno
+      productivo (ej. `waitress` o `gunicorn`), y restringir CORS a los dominios
+      reales en vez de `*`.
