@@ -18,8 +18,9 @@ Uso:
 """
 import joblib
 import pandas as pd
+from pathlib import Path
 
-MODEL_PATH = "/home/claude/work/ml-models/compatibility/models/modelo_compatibilidad.joblib"
+MODEL_PATH = Path(__file__).resolve().parents[1] / "models" / "modelo_compatibilidad.joblib"
 
 _modelo = None
 

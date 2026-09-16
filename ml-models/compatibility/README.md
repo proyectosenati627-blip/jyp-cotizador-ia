@@ -60,6 +60,28 @@ python src/train_model.py        # (ya entrenado, solo si se quiere reentrenar)
 python src/predict.py            # corre 2 ejemplos de demostración
 ```
 
+### Preparación en Windows
+
+Desde la carpeta `ml-models/compatibility`, cada integrante puede preparar un
+entorno aislado y levantar la API con estos comandos en PowerShell:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+python api\app.py
+```
+
+La API quedará disponible en `http://127.0.0.1:5001`. Para comprobar que está
+activa, abrir otra ventana de PowerShell y ejecutar:
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:5001/health
+```
+
+Para probar una combinación, se puede enviar un JSON con los diez campos
+requeridos al endpoint `POST /validar-compatibilidad`.
+
 ## API (para conectar con el chatbot / plugin de WordPress)
 
 El modelo ya está expuesto como una API REST con Flask en `api/app.py`.
@@ -94,6 +116,19 @@ $resultado = json_decode(wp_remote_retrieve_body($response), true);
 
 Ya fue probada en vivo con 4 casos: salud del servicio, combinación compatible,
 combinación no compatible (con explicaciones) y validación de campos faltantes.
+
+## Limitaciones conocidas
+
+El modelo verifica la coincidencia entre el socket del procesador y el de la
+motherboard, así como entre el tipo de RAM indicado para ambos componentes, pero
+no valida si esa combinación de socket y tipo de RAM es técnicamente realista.
+Por ejemplo, puede recibir una motherboard con una combinación de características
+que no existe en el mercado y aun así generar una predicción.
+
+Por esta razón, los resultados pueden ser poco confiables cuando se envían
+combinaciones inexistentes o productos que no corresponden a hardware real. Antes
+de usar el modelo en producción, los datos deberían contrastarse con un catálogo
+real de componentes y ampliarse las reglas de validación cuando sea necesario.
 
 ## Pendiente
 
