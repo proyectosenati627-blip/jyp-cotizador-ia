@@ -1,101 +1,112 @@
-# Título del Proyecto
+# Sistema de Cotización Inteligente — J&P Periféricos S.A.C.
 
-_Acá va un párrafo que describa lo que es el proyecto_
+Proyecto de Innovación y Mejora — Ingeniería de Software con Inteligencia Artificial,
+SENATI (6to ciclo). Desarrollado para la empresa **J&P Periféricos S.A.C.**, dedicada
+a la venta de periféricos, equipos de cómputo y soporte técnico.
 
-## Comenzando 🚀
+El proyecto busca reducir los errores de compatibilidad y el tiempo de respuesta en
+el proceso de cotización de la empresa, mediante dos modelos de Machine Learning
+entrenados por el equipo y un chatbot conversacional que los consulta:
 
-_Estas instrucciones te permitirán obtener una copia del proyecto en funcionamiento en tu máquina local para propósitos de desarrollo y pruebas._
+1. **Modelo de validación de compatibilidad de componentes** — valida si una
+   combinación de piezas (CPU, placa madre, RAM, GPU, fuente, gabinete) es compatible
+   antes de generar una cotización. ✅ Entrenado y expuesto vía API.
+2. **Modelo de predicción de demanda** — apoya la gestión de inventario a partir del
+   historial de ventas. ⏳ Pendiente de iniciar (depende de la confirmación de datos
+   históricos por parte de la empresa).
+3. **Chatbot conversacional** — interfaz con el cliente; consulta a ambos modelos
+   para armar cotizaciones confiables. ⏳ No iniciado.
 
-Mira **Deployment** para conocer como desplegar el proyecto.
+> El diferenciador académico del proyecto son los modelos entrenados, no el chatbot
+> en sí mismo (que actúa solo como interfaz). Ver `CONTEXTO.md` para el detalle
+> completo del planteamiento, alcance y decisiones ya tomadas por el equipo.
 
+## Estado actual del proyecto
 
-### Pre-requisitos 📋
+| Componente | Estado |
+|---|---|
+| Sitio WordPress local (copia de desarrollo, vía Duplicator) | ✅ Levantado |
+| Modelo de validación de compatibilidad | ✅ Entrenado (97.25% accuracy, F1 0.957) |
+| API del modelo de compatibilidad (Flask) | ✅ Funcionando, probada localmente |
+| Modelo de predicción de demanda | ⏳ Pendiente |
+| Chatbot conversacional | ⏳ Pendiente |
+| Conexión API ↔ plugin de WordPress | ⏳ Pendiente |
+| Tesina (Capítulos 1 y 2, APA 7) | ✅ Completos |
+| Tesina (Capítulos 3, 4 y 5) | ⏳ Pendientes |
 
-_Que cosas necesitas para instalar el software y como instalarlas_
-
-```
-Da un ejemplo
-```
-
-### Instalación 🔧
-
-_Una serie de ejemplos paso a paso que te dice lo que debes ejecutar para tener un entorno de desarrollo ejecutandose_
-
-_Dí cómo será ese paso_
-
-```
-Da un ejemplo
-```
-
-_Y repite_
-
-```
-hasta finalizar
-```
-
-_Finaliza con un ejemplo de cómo obtener datos del sistema o como usarlos para una pequeña demo_
-
-## Ejecutando las pruebas ⚙️
-
-_Explica como ejecutar las pruebas automatizadas para este sistema_
-
-### Analice las pruebas end-to-end 🔩
-
-_Explica que verifican estas pruebas y por qué_
+## Estructura del repositorio
 
 ```
-Da un ejemplo
+jyp-cotizador-ia/
+├── .github/
+│   └── copilot-instructions.md   # Contexto automático para asistentes de IA
+├── CONTEXTO.md                   # Contexto completo del proyecto (leer primero)
+├── .gitignore
+├── src/                          # Código PHP del plugin de WordPress
+└── ml-models/
+    └── compatibility/            # Modelo de validación de compatibilidad
+        ├── data/                 # Dataset de entrenamiento
+        ├── src/                  # Generación de datos, entrenamiento y predicción
+        ├── models/               # Modelo entrenado (.joblib) y métricas
+        ├── api/                  # API Flask que expone el modelo
+        └── README.md             # Metodología detallada de este modelo
 ```
 
-### Y las pruebas de estilo de codificación ⌨️
+> Nota: este repositorio **no** contiene el núcleo de WordPress (`wp-admin`,
+> `wp-includes`, etc.), solo el código propio del equipo. El sitio de desarrollo se
+> levanta en local a partir de un paquete de Duplicator compartido por Drive entre
+> el equipo (ver `CONTEXTO.md`, sección "Entorno de desarrollo").
 
-_Explica que verifican estas pruebas y por qué_
+## Cómo levantar el proyecto en local
 
+### 1. Sitio WordPress (entorno de desarrollo)
+1. Instalar Laragon o XAMPP.
+2. Solicitar al equipo el paquete de Duplicator (`.zip` + `installer.php`, compartido
+   por Drive) y la base de datos (`.sql`).
+3. Colocar el paquete en `www/` (Laragon) o `htdocs/` (XAMPP) y correr el instalador
+   desde el navegador.
+4. Clonar este repositorio dentro de `wp-content/plugins/` de esa instalación local.
+
+### 2. Modelo de compatibilidad + API
+```bash
+cd ml-models/compatibility
+pip install -r requirements.txt
+python src/train_model.py       # ya entrenado; solo si se quiere reentrenar
+python api/app.py               # levanta la API en http://localhost:5001
 ```
-Da un ejemplo
+
+Probar la API:
+```bash
+curl -X POST http://localhost:5001/validar-compatibilidad \
+  -H "Content-Type: application/json" \
+  -d '{"cpu_socket":"AM4","mb_socket":"AM4","ram_type":"DDR4","mb_ram_type":"DDR4","cpu_tdp_w":105,"gpu_tdp_w":220,"psu_wattage":650,"gpu_length_mm":310,"case_form_factor":"ATX","mb_form_factor":"ATX"}'
 ```
 
-## Despliegue 📦
+Ver `ml-models/compatibility/README.md` para la metodología completa (por qué se
+usó un dataset sintético, qué reglas de compatibilidad se aplicaron, y las métricas
+detalladas del modelo).
 
-_Agrega notas adicionales sobre como hacer deploy_
+## Tecnologías utilizadas
 
-## Construido con 🛠️
+- **WordPress** — sitio base de la empresa (entorno de desarrollo local).
+- **Python** (`scikit-learn`, `pandas`, `Flask`) — modelos de Machine Learning y su API.
+- **PHP** — plugin personalizado de WordPress (`jyp-cotizador-ia`).
+- **LaTeX** — documentación de la tesina en formato APA 7ma edición.
+- **Git / GitHub** — control de versiones del código propio del equipo.
 
-_Menciona las herramientas que utilizaste para crear tu proyecto_
+## Equipo
 
-* [Dropwizard](http://www.dropwizard.io/1.0.2/docs/) - El framework web usado
-* [Maven](https://maven.apache.org/) - Manejador de dependencias
-* [ROME](https://rometools.github.io/rome/) - Usado para generar RSS
+- Guillermo Alex Donayre Patow
+- Andres Daniel Galindo Gonzalez
+- Angelo Aaron Rojas Tipiani
 
-## Contribuyendo 🖇️
+**Asesor:** Mg. Jose Armando Tiznado Ubillus — SENATI, Ingeniería de Software con
+Inteligencia Artificial.
 
-Por favor lee el [CONTRIBUTING.md](https://gist.github.com/villanuevand/xxxxxx) para detalles de nuestro código de conducta, y el proceso para enviarnos pull requests.
+## Nota académica
 
-## Wiki 📖
-
-Puedes encontrar mucho más de cómo utilizar este proyecto en nuestra [Wiki](https://github.com/tu/proyecto/wiki)
-
-## Versionado 📌
-
-Usamos [SemVer](http://semver.org/) para el versionado. Para todas las versiones disponibles, mira los [tags en este repositorio](https://github.com/tu/proyecto/tags).
-
-## Autores ✒️
-
-_Menciona a todos aquellos que ayudaron a levantar el proyecto desde sus inicios_
-
-* **Andrés Villanueva** - *Trabajo Inicial* - [villanuevand](https://github.com/villanuevand)
-* **Fulanito Detal** - *Documentación* - [fulanitodetal](#fulanito-de-tal)
-
-También puedes mirar la lista de todos los [contribuyentes](https://github.com/your/project/contributors) quíenes han participado en este proyecto. 
-
-## Licencia 📄
-
-Este proyecto está bajo la Licencia (Tu Licencia) - mira el archivo [LICENSE.md](LICENSE.md) para detalles
-
-## Expresiones de Gratitud 🎁
-
-* Comenta a otros sobre este proyecto 📢
-* Invita una cerveza 🍺 o un café ☕ a alguien del equipo. 
-* Da las gracias públicamente 🤓.
-* Dona con cripto a esta dirección: `0xf253fc233333078436d111175e5a76a649890000`
-* etc.
+Este es un proyecto académico (tesina de fin de carrera). El sitio real de J&P
+Periféricos S.A.C. **no es modificado en ningún momento**; todo el desarrollo se
+realiza sobre una copia local. El diagnóstico inicial del problema se realizó con
+respuestas estimadas del equipo (autorizado por el docente del curso), pendientes de
+reemplazar por respuestas reales de la empresa en cuanto se coordine la entrevista.
